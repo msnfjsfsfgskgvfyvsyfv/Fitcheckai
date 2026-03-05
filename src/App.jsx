@@ -12,25 +12,25 @@ function App() {
   const [page, setPage] = useState('landing')
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
 
-  async function handleUpload(file) {
+  async function handleUpload(file, preview) {
     if (hasReachedLimit()) {
       setPage('paywall')
       return
     }
 
+    setImagePreview(preview)
     setPage('loading')
     setError(null)
 
     try {
-      // Compress image
       const compressed = await imageCompression(file, {
         maxSizeMB: 1,
         maxWidthOrHeight: 1024,
         useWebWorker: true,
       })
 
-      // Convert to base64
       const reader = new FileReader()
       const base64 = await new Promise((resolve, reject) => {
         reader.onload = () => resolve(reader.result)
@@ -65,6 +65,7 @@ function App() {
     } else {
       setResult(null)
       setError(null)
+      setImagePreview(null)
       setPage('upload')
     }
   }
@@ -86,7 +87,7 @@ function App() {
       {page === 'upload' && (
         <Upload onUpload={handleUpload} error={error} onBack={() => setPage('landing')} />
       )}
-      {page === 'loading' && <Loading />}
+      {page === 'loading' && <Loading imagePreview={imagePreview} />}
       {page === 'results' && result && (
         <Results result={result} onReset={handleReset} />
       )}
