@@ -241,7 +241,7 @@ export default function Results({ result, onReset, goal }) {
         {goal && (
           <div className="w-full max-w-sm glass-card px-4 py-3 mb-4 animate-fade-in-up" style={{ animationDelay: '0ms' }}>
             <p className="text-[#737373] text-xs font-medium uppercase tracking-wider mb-1">Your goal</p>
-            <p className="text-[#F5F5F5]/80 text-sm italic">"{goal}"</p>
+            <p className="text-[#F5F5F5]/80 text-sm italic">{`\u201C${goal}\u201D`}</p>
           </div>
         )}
 
@@ -279,7 +279,7 @@ export default function Results({ result, onReset, goal }) {
             <ul className="space-y-2.5">
               {result.whats_fire.map((item, i) => (
                 <li key={i} className="text-[#F5F5F5]/90 text-sm flex gap-2.5 leading-relaxed">
-                  <span className="text-[#BFFF00] flex-shrink-0 mt-0.5">&check;</span>
+                  <span className="text-[#BFFF00] flex-shrink-0 mt-0.5">{'\u2713'}</span>
                   {item}
                 </li>
               ))}

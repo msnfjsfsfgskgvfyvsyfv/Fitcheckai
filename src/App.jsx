@@ -4,7 +4,7 @@ import Upload from './components/Upload'
 import Loading from './components/Loading'
 import Results from './components/Results'
 import Paywall from './components/Paywall'
-import { analyzeOutfit } from './lib/api'
+import { analyzeOutfit, getErrorMessage } from './lib/api'
 import { hasReachedLimit, incrementUsage, getRemainingChecks } from './lib/limits'
 import imageCompression from 'browser-image-compression'
 
@@ -55,8 +55,8 @@ function App() {
       setResult(analysis)
       setPage('results')
     } catch (err) {
-      console.error('Analysis failed:', err)
-      setError('Something went wrong. Please try again.')
+      console.error('[FitCheckAI] Analysis failed:', err)
+      setError(getErrorMessage(err))
       setPage('upload')
     }
   }
