@@ -10,6 +10,20 @@ INSTRUCTIONS:
 - Handle ALL genders and styles equally.
 - If the photo is blurry, too zoomed in, has no visible outfit, or is not a person: return an error response.
 
+CONTEXT-AWARE RATING:
+The user may optionally provide:
+- "occasion": where they're going (e.g., "Date night", "School", "Wedding / formal", "Work")
+- "vibe": the style they're going for (e.g., "Casual", "Dressy", "Streetwear", "Cozy")
+
+If context is provided, factor it heavily into your rating:
+- A hoodie + sweats for "hanging with friends" + "cozy" = score well because it MATCHES the context
+- A hoodie + sweats for "date night" + "dressy" = score low because it DOESN'T match
+- A full suit for "wedding" + "professional" = score high
+- A full suit for "school" + "casual" = call out the mismatch ("you're overdoing it for class")
+- Make feedback specific to the occasion: "This is a strong date night look — the fitted jacket says effort without trying too hard."
+
+If NO context is provided, rate on general style merit alone.
+
 SCORING GUIDE:
 - 1-3: Major issues (clashing colors, terrible fit, looks thrown together)
 - 4-5: Below average (boring, no effort, something's off)
@@ -63,12 +77,20 @@ For invalid photos (blurry, no outfit, not a person, etc):
   "error_message": "Brief explanation of why the photo can't be rated"
 }`;
 
-export async function analyzeOutfit(imageBase64, mimeType) {
+export async function analyzeOutfit(imageBase64, mimeType, context = {}) {
   const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
 
   if (!apiKey || apiKey === 'your-api-key-here') {
-    // Return mock data for development
-    return getMockResult();
+    return getMockResult(context);
+  }
+
+  // Build the user message with optional context
+  let userText = 'Rate this outfit.';
+  if (context.occasion || context.vibe) {
+    const parts = [];
+    if (context.occasion) parts.push(`Occasion: ${context.occasion}`);
+    if (context.vibe) parts.push(`Vibe they're going for: ${context.vibe}`);
+    userText = `Rate this outfit.\n\nContext:\n${parts.join('\n')}`;
   }
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -97,7 +119,7 @@ export async function analyzeOutfit(imageBase64, mimeType) {
             },
             {
               type: 'text',
-              text: 'Rate this outfit.',
+              text: userText,
             },
           ],
         },
@@ -116,14 +138,17 @@ export async function analyzeOutfit(imageBase64, mimeType) {
   try {
     return JSON.parse(text);
   } catch {
-    // Try to extract JSON from the response
     const match = text.match(/\{[\s\S]*\}/);
     if (match) return JSON.parse(match[0]);
     throw new Error('Failed to parse AI response');
   }
 }
 
-function getMockResult() {
+function getMockResult(context = {}) {
+  // Adjust mock based on context for realistic dev testing
+  const isCozy = context.vibe === 'Cozy' || context.vibe === 'Casual';
+  const isFormal = context.occasion === 'Wedding / formal' || context.occasion === 'Work';
+
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
@@ -139,19 +164,23 @@ function getMockResult() {
         },
         style_vibe: 'Clean Casual',
         whats_fire: [
-          'The neutral color palette is working — everything flows together',
+          context.occasion
+            ? `Great choice for ${context.occasion.toLowerCase()} — the outfit matches the vibe`
+            : 'The neutral color palette is working — everything flows together',
           'Proportions are on point, the fit looks intentional',
         ],
         what_to_fix: [
           'A simple watch or bracelet would add some dimension',
-          'Try swapping the sneakers for leather boots to elevate it',
+          context.occasion === 'Date night'
+            ? 'Swap the sneakers for leather boots to level this up for date night'
+            : 'Try swapping the sneakers for leather boots to elevate it',
         ],
         occasion_match: {
           date_night: true,
           school: true,
           job_interview: false,
           hanging_out: true,
-          formal_event: false,
+          formal_event: isFormal,
         },
       });
     }, 2500);

@@ -14,7 +14,7 @@ function App() {
   const [error, setError] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
 
-  async function handleUpload(file, preview) {
+  async function handleUpload(file, preview, context) {
     if (hasReachedLimit()) {
       setPage('paywall')
       return
@@ -41,7 +41,7 @@ function App() {
       const [header, data] = base64.split(',')
       const mimeType = header.match(/data:(.*?);/)?.[1] || 'image/jpeg'
 
-      const analysis = await analyzeOutfit(data, mimeType)
+      const analysis = await analyzeOutfit(data, mimeType, context)
 
       if (analysis.error) {
         setError(analysis.error_message)
