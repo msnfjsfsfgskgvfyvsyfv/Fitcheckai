@@ -1,0 +1,11 @@
+{
+  "name": "FitCheckAI",
+  "short_name": "FitCheck",
+  "start_url": "/Fitcheckai/",
+  "display": "standalone",
+  "background_color": "#09090B",
+  "theme_color": "#8B5CF6",
+  "icons": [
+    { "src": "/Fitcheckai/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
