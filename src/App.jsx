@@ -13,6 +13,7 @@ function App() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
+  const [userContext, setUserContext] = useState(null)
 
   async function handleUpload(file, preview, context) {
     if (hasReachedLimit()) {
@@ -21,6 +22,7 @@ function App() {
     }
 
     setImagePreview(preview)
+    setUserContext(context)
     setPage('loading')
     setError(null)
 
@@ -66,6 +68,7 @@ function App() {
       setResult(null)
       setError(null)
       setImagePreview(null)
+      setUserContext(null)
       setPage('upload')
     }
   }
@@ -87,9 +90,9 @@ function App() {
       {page === 'upload' && (
         <Upload onUpload={handleUpload} error={error} onBack={() => setPage('landing')} />
       )}
-      {page === 'loading' && <Loading imagePreview={imagePreview} />}
+      {page === 'loading' && <Loading imagePreview={imagePreview} goal={userContext?.goal} />}
       {page === 'results' && result && (
-        <Results result={result} onReset={handleReset} />
+        <Results result={result} onReset={handleReset} goal={userContext?.goal} />
       )}
       {page === 'paywall' && <Paywall />}
     </div>
